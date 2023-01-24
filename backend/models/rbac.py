@@ -4,7 +4,7 @@ from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from backend.db.session import Base
+from db.session import Base
 
 
 class User(Base):
@@ -21,8 +21,8 @@ class User(Base):
 class UserHasRole(Base):
     __tablename__ = "user_has_role"
 
-    user_id = Column(UUID, ForeignKey("user.id"), nullable=False)
-    role_id = Column(UUID, ForeignKey("role.id"), nullable=False)
+    user_id = Column(UUID, ForeignKey("user.id"), primary_key=True, nullable=False)
+    role_id = Column(UUID, ForeignKey("role.id"), primary_key=True, nullable=False)
 
 
 class Role(Base):
@@ -38,8 +38,10 @@ class Role(Base):
 class RoleHasPermission(Base):
     __tablename__ = "role_has_permission"
 
-    role_id = Column(UUID, ForeignKey("role.id"), nullable=False)
-    permission_id = Column(UUID, ForeignKey("permission.id"), nullable=False)
+    role_id = Column(UUID, ForeignKey("role.id"), primary_key=True, nullable=False)
+    permission_id = Column(
+        UUID, ForeignKey("permission.id"), primary_key=True, nullable=False
+    )
 
 
 class Permission(Base):
@@ -66,5 +68,5 @@ class Group(Base):
 class GroupHasUser(Base):
     __tablename__ = "group_has_user"
 
-    group_id = Column(UUID, ForeignKey("group.id"), nullable=False)
-    user_id = Column(UUID, ForeignKey("user.id"), nullable=False)
+    group_id = Column(UUID, ForeignKey("group.id"), primary_key=True, nullable=False)
+    user_id = Column(UUID, ForeignKey("user.id"), primary_key=True, nullable=False)

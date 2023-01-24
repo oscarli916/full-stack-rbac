@@ -6,5 +6,6 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=rbac
     ports:
       - '4000:5432'
