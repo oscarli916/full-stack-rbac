@@ -9,3 +9,8 @@ services:
       - POSTGRES_DB=rbac
     ports:
       - '4000:5432'
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+    command: sh -c "./wait-for-it.sh db:5432 --timeout=30 && ./db/init_db.sh"
