@@ -5,9 +5,16 @@ interface ILogin {
 	setEmail: React.Dispatch<React.SetStateAction<string>>;
 	password: string;
 	setPassword: React.Dispatch<React.SetStateAction<string>>;
+	onSubmitHandler: () => Promise<void>;
 }
 
-const Login = ({ email, setEmail, password, setPassword }: ILogin) => (
+const Login = ({
+	email,
+	setEmail,
+	password,
+	setPassword,
+	onSubmitHandler,
+}: ILogin) => (
 	<Box
 		display="flex"
 		flexDirection="column"
@@ -44,7 +51,7 @@ const Login = ({ email, setEmail, password, setPassword }: ILogin) => (
 				setPassword(e.target.value);
 			}}
 		/>
-		<Button sx={{ mt: 3 }} variant="contained">
+		<Button onClick={onSubmitHandler} sx={{ mt: 3 }} variant="contained">
 			Sign In
 		</Button>
 	</Box>
