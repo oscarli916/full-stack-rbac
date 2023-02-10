@@ -54,6 +54,11 @@ const Login = ({
 		<Button onClick={onSubmitHandler} sx={{ mt: 3 }} variant="contained">
 			Sign In
 		</Button>
+		<Typography sx={{ mt: 5 }}>Users:</Typography>
+		<Typography sx={{ mt: 2 }}>admin@test.com</Typography>
+		<Typography sx={{ mt: 2 }}>manager1@test.com</Typography>
+		<Typography sx={{ mt: 2 }}>senior@test.com</Typography>
+		<Typography sx={{ mt: 2 }}>test1@test.com</Typography>
 	</Box>
 );
 
