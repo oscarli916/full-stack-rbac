@@ -30,4 +30,8 @@ Default data will be seeded automatically
 
     `python seed_permission.py [<permission1>]`
 
+### Endpoints
+
+the `auth` endpoint make sure user has all the permissions(AND check)
+
 ## Frontend
