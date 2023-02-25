@@ -1,9 +1,12 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
+from typing import Any
 from uuid import UUID
 
 import bcrypt
 import jwt
+
+import main
 
 
 def get_password_hash(password: str) -> str:
@@ -18,8 +21,8 @@ def generate_jwt(permission_ids: list[UUID], email: str) -> str:
     permission_ids = [str(permission_id) for permission_id in permission_ids]
     payload = {
         "iss": "full-stack-rbac",
-        "exp": datetime.now() + timedelta(days=1),
-        "iat": datetime.now(),
+        "exp": datetime.now(tz=timezone.utc) + timedelta(days=1),
+        "iat": datetime.now(tz=timezone.utc),
         "permissions": permission_ids,
         "email": email,
     }
@@ -28,3 +31,19 @@ def generate_jwt(permission_ids: list[UUID], email: str) -> str:
         os.getenv("SECRET_KEY"),
         algorithm="HS256",
     )
+
+
+def verify_jwt(token: str) -> dict[str, Any]:
+    try:
+        return jwt.decode(
+            token,
+            os.getenv("SECRET_KEY"),
+            algorithms=["HS256"],
+            issuer="full-stack-rbac",
+        )
+    except Exception as e:
+        raise main.UvicornException(
+            status_code=401,
+            message="user is not authorized",
+            error=str(e),
+        )

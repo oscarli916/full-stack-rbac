@@ -1,10 +1,28 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import uvicorn
 
 from api.api_v1.api import api_router
 
+
+class UvicornException(Exception):
+    def __init__(self, status_code: int, message: str, error: str) -> None:
+        self.status_code = status_code
+        self.message = message
+        self.error = error
+
+
 app = FastAPI()
+
+
+@app.exception_handler(UvicornException)
+async def uvicorn_exception_handler(request: Request, exc: UvicornException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.message, "error": exc.error},
+    )
+
 
 app.add_middleware(
     CORSMiddleware,
