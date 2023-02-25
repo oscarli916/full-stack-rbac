@@ -11,3 +11,11 @@ def db() -> Generator:
     yield TestSessionLocal()
     TestSessionLocal().close_all()
     Base.metadata.drop_all(bind=test_engine)
+
+
+def override_get_db():
+    try:
+        db = TestSessionLocal()
+        yield db
+    finally:
+        db.close()

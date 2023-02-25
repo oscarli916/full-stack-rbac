@@ -1,13 +1,23 @@
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
+from api.deps import get_db
+import crud
 from main import app
+from schemas.rbac import UserCreate
+from tests.conftest import override_get_db
 
+app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
 
-def test_login_success() -> None:
-    login_data = {"email": "admin@test.com", "password": "12345678"}
+def test_login_success(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    admin = UserCreate(email=email, password=password)
+    db_obj = crud.rbac.create_user(db, obj_in=admin)
+    login_data = {"email": email, "password": password}
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
     assert r.status_code == 201
@@ -16,8 +26,12 @@ def test_login_success() -> None:
     assert res["token"]
 
 
-def test_login_wrong_password() -> None:
-    login_data = {"email": "admin@test.com", "password": "87654321"}
+def test_login_wrong_password(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    admin = UserCreate(email=email, password=password)
+    db_obj = crud.rbac.create_user(db, obj_in=admin)
+    login_data = {"email": email, "password": "87654321"}
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
     assert r.status_code == 400
@@ -25,7 +39,11 @@ def test_login_wrong_password() -> None:
     assert res["message"] == "Incorrect email or password"
 
 
-def test_login_invalid_user() -> None:
+def test_login_invalid_user(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    admin = UserCreate(email=email, password=password)
+    db_obj = crud.rbac.create_user(db, obj_in=admin)
     login_data = {"email": "invalid@test.com", "password": "87654321"}
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
@@ -34,8 +52,12 @@ def test_login_invalid_user() -> None:
     assert res["message"] == "Incorrect email or password"
 
 
-def test_auth_success_without_permissions() -> None:
-    login_data = {"email": "admin@test.com", "password": "12345678"}
+def test_auth_success_without_permissions(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    admin = UserCreate(email=email, password=password)
+    db_obj = crud.rbac.create_user(db, obj_in=admin)
+    login_data = {"email": email, "password": password}
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
 
@@ -47,8 +69,24 @@ def test_auth_success_without_permissions() -> None:
     assert res["message"] == "success"
 
 
-def test_auth_success_with_permissions() -> None:
-    login_data = {"email": "admin@test.com", "password": "12345678"}
+def test_auth_success_with_permissions(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+
+    role = crud.rbac.create_role(db, role_name="admin")
+
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
 
@@ -68,8 +106,20 @@ def test_auth_success_with_permissions() -> None:
     assert res["message"] == "success"
 
 
-def test_auth_without_permission() -> None:
-    login_data = {"email": "admin@test.com", "password": "12345678"}
+def test_auth_without_permission(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+
+    role = crud.rbac.create_role(db, role_name="admin")
+
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+
+    login_data = {"email": email, "password": password}
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
 

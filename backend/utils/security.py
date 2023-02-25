@@ -6,7 +6,7 @@ from uuid import UUID
 import bcrypt
 import jwt
 
-import main
+from utils.exception import UvicornException
 
 
 def get_password_hash(password: str) -> str:
@@ -42,7 +42,7 @@ def verify_jwt(token: str) -> dict[str, Any]:
             issuer="full-stack-rbac",
         )
     except Exception as e:
-        raise main.UvicornException(
+        raise UvicornException(
             status_code=401,
             message="user is not authorized",
             error=str(e),

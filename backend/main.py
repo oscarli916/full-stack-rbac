@@ -4,13 +4,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from api.api_v1.api import api_router
-
-
-class UvicornException(Exception):
-    def __init__(self, status_code: int, message: str, error: str) -> None:
-        self.status_code = status_code
-        self.message = message
-        self.error = error
+from utils.exception import UvicornException
 
 
 app = FastAPI()
