@@ -15,3 +15,15 @@ class UserCreate(BaseModel):
 
 #     class Config:
 #         orm_mode = True
+
+
+class PermissionCreate(BaseModel):
+    name: str
+
+
+class PermissionOut(BaseModel):
+    id: UUID
+    name: str
+
+    class Config:
+        orm_mode = True

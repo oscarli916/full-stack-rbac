@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=Token, status_code=201)
-def login(body: UserCreate, db: Session = Depends(get_db)) -> Any:
+async def login(body: UserCreate, db: Session = Depends(get_db)) -> Any:
     user = crud.rbac.authenticate(db, obj_in=body)
     if not user:
         return JSONResponse(
@@ -36,7 +36,7 @@ def login(body: UserCreate, db: Session = Depends(get_db)) -> Any:
 
 
 @router.post("", status_code=201)
-def auth(body: Token, db: Session = Depends(get_db)) -> Any:
+async def auth(body: Token, db: Session = Depends(get_db)) -> Any:
     payload = verify_jwt(body.token)
     permission_names = [
         crud.rbac.get_permission_name_by_id(db, permission_id=permission_id)
