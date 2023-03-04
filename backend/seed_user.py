@@ -4,9 +4,9 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-import crud
 from db.session import SessionLocal
-from schemas.rbac import UserCreate
+from models.rbac import User
+from utils.security import get_password_hash
 
 
 logging.basicConfig(
@@ -18,8 +18,10 @@ logging.basicConfig(
 
 def seed_user(db: Session, email: str, password: str) -> UUID:
     logging.info("Seeding normal user")
-    user = UserCreate(email=email, password=password)
-    crud.rbac.create_user(db, obj_in=user)
+    db_obj = User(email=email, hashed_password=get_password_hash(password))
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
     logging.info("Normal user has been seeded")
 
 
