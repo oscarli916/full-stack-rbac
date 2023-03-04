@@ -30,10 +30,15 @@ Default data will be seeded automatically
 
     `python seed_permission.py [<permission1>]`
 
+### Endpoints
+
+the `auth` endpoint make sure user has all the permissions(AND check)
+
 ### FAQ
 
 -   #### `/usr/bin/env: ‘bash\r’: No such file or directory` during docker compose:
 
     Make sure all the `.sh` files are using `LF` for End of Line Sequence
+
 
 ## Frontend
