@@ -89,6 +89,9 @@ class CRUDRbac:
     def get_permission_by_name(self, db: Session, name: str) -> Permission | None:
         return db.query(Permission).filter(Permission.name == name).first()
 
+    def get_permissions(self, db: Session) -> list[Permission]:
+        return db.query(Permission).all()
+
     def create_permissions(
         self, db: Session, permissions: list[str]
     ) -> list[Permission]:

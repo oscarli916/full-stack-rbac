@@ -28,3 +28,11 @@ async def create_permission(
             error=f"permission id: {db_obj.id}, permission name: {db_obj.name}",
         )
     return crud.rbac.create_permissions(db, permissions=[permission.name])[0]
+
+
+@router.get("/permission", response_model=list[PermissionOut], status_code=200)
+async def read_permissions(
+    authorization: str | None = Header(default=None), db: Session = Depends(get_db)
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.read"])
+    return crud.rbac.get_permissions(db)
