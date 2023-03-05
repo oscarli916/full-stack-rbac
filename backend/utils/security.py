@@ -4,6 +4,7 @@ from typing import Any
 from uuid import UUID
 
 import bcrypt
+from fastapi.responses import JSONResponse
 import jwt
 from sqlalchemy.orm import Session
 
@@ -63,7 +64,7 @@ async def verify_permission(
         )
     token = authorization.split("Bearer ")[1]
     res = await auth.auth(Token(permissions=permissions, token=token), db=db)
-    if "status_code" in res and res.status_code == 401:
+    if type(res) == JSONResponse and res.status_code == 401:
         raise UvicornException(
             status_code=401,
             message="user is not authorized",
