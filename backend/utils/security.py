@@ -63,7 +63,7 @@ async def verify_permission(
         )
     token = authorization.split("Bearer ")[1]
     res = await auth.auth(Token(permissions=permissions, token=token), db=db)
-    if res.status_code == 401:
+    if "status_code" in res and res.status_code == 401:
         raise UvicornException(
             status_code=401,
             message="user is not authorized",
