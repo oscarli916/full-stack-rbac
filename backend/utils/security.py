@@ -62,5 +62,11 @@ async def verify_permission(
             error="header does not start with Bearer",
         )
     token = authorization.split("Bearer ")[1]
-    await auth.auth(Token(permissions=permissions, token=token), db=db)
+    res = await auth.auth(Token(permissions=permissions, token=token), db=db)
+    if res.status_code == 401:
+        raise UvicornException(
+            status_code=401,
+            message="user is not authorized",
+            error="user does not have permission",
+        )
     return True
