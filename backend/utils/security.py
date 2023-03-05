@@ -56,7 +56,7 @@ def verify_jwt(token: str) -> dict[str, Any]:
 async def verify_permission(
     db: Session, authorization: str | None, permissions: list[str]
 ) -> bool:
-    if not authorization.startswith("Bearer "):
+    if not authorization or not authorization.startswith("Bearer "):
         raise UvicornException(
             status_code=401,
             message="user is not authorized",
