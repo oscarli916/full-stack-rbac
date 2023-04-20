@@ -86,6 +86,11 @@ class CRUDRbac:
             db.query(Permission.name).filter(Permission.id == permission_id).first()[0]
         )
 
+    def get_permission_by_id(
+        self, db: Session, permission_id: UUID
+    ) -> Permission | None:
+        return db.query(Permission).filter(Permission.id == permission_id).first()
+
     def get_permission_by_name(self, db: Session, name: str) -> Permission | None:
         return db.query(Permission).filter(Permission.name == name).first()
 

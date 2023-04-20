@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
@@ -36,3 +37,23 @@ async def read_permissions(
 ) -> Any:
     await verify_permission(db, authorization, permissions=["setting.read"])
     return crud.rbac.get_permissions(db)
+
+
+@router.patch("/permission/{id}", response_model=PermissionOut, status_code=200)
+async def update_permission(
+    id: UUID,
+    permission: PermissionCreate,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.update"])
+    db_obj = crud.rbac.get_permission_by_id(db, permission_id=id)
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="permission not found",
+            error=f"no permission id: {id}",
+        )
+    db_obj.name = permission.name
+    db.commit()
+    return db_obj
