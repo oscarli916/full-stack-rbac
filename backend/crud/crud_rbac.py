@@ -107,5 +107,9 @@ class CRUDRbac:
             db.refresh(db_obj)
         return db_objs
 
+    def delete_permission(self, db: Session, permission: Permission) -> None:
+        db.delete(permission)
+        db.commit()
+
 
 rbac = CRUDRbac()

@@ -57,3 +57,20 @@ async def update_permission(
     db_obj.name = permission.name
     db.commit()
     return db_obj
+
+
+@router.delete("/permission/{id}", status_code=204)
+async def delete_permission(
+    id: UUID,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    await verify_permission(db, authorization, permissions=["setting.delete"])
+    db_obj = crud.rbac.get_permission_by_id(db, permission_id=id)
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="permission not found",
+            error=f"no permission id: {id}",
+        )
+    crud.rbac.delete_permission(db, permission=db_obj)
