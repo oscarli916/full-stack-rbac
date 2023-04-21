@@ -43,6 +43,15 @@ class CRUDRbac:
         return db_obj
 
     # RoleHasPermission
+    def get_all_by_permission_id(
+        self, db: Session, permission_id: UUID
+    ) -> list[RoleHasPermission]:
+        return (
+            db.query(RoleHasPermission)
+            .filter(RoleHasPermission.permission_id == permission_id)
+            .all()
+        )
+
     def get_all_permission_ids_by_role_id(
         self, db: Session, role_id: UUID
     ) -> list[UUID]:
@@ -63,6 +72,12 @@ class CRUDRbac:
         db.add_all(db_objs)
         db.commit()
         return db_objs
+
+    def delete_role_has_permission(
+        self, db: Session, role_has_permission: RoleHasPermission
+    ) -> None:
+        db.delete(role_has_permission)
+        db.commit()
 
     # UserHasRole
     def get_all_role_ids_by_user_id(self, db: Session, user_id: UUID) -> list[UUID]:
@@ -86,6 +101,17 @@ class CRUDRbac:
             db.query(Permission.name).filter(Permission.id == permission_id).first()[0]
         )
 
+    def get_permission_by_id(
+        self, db: Session, permission_id: UUID
+    ) -> Permission | None:
+        return db.query(Permission).filter(Permission.id == permission_id).first()
+
+    def get_permission_by_name(self, db: Session, name: str) -> Permission | None:
+        return db.query(Permission).filter(Permission.name == name).first()
+
+    def get_permissions(self, db: Session) -> list[Permission]:
+        return db.query(Permission).all()
+
     def create_permissions(
         self, db: Session, permissions: list[str]
     ) -> list[Permission]:
@@ -95,6 +121,23 @@ class CRUDRbac:
         for db_obj in db_objs:
             db.refresh(db_obj)
         return db_objs
+
+    def update_permission(
+        self, db: Session, permission: Permission, new_permission_name: str
+    ) -> Permission:
+        permission.name = new_permission_name
+        db.commit()
+        db.refresh(permission)
+        return permission
+
+    def delete_permission(self, db: Session, permission: Permission) -> None:
+        role_has_permissions = self.get_all_by_permission_id(
+            db, permission_id=permission.id
+        )
+        for role_has_permission in role_has_permissions:
+            self.delete_role_has_permission(db, role_has_permission)
+        db.delete(permission)
+        db.commit()
 
 
 rbac = CRUDRbac()
