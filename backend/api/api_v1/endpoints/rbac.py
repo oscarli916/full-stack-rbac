@@ -54,9 +54,9 @@ async def update_permission(
             message="permission not found",
             error=f"no permission id: {id}",
         )
-    db_obj.name = permission.name
-    db.commit()
-    return db_obj
+    return crud.rbac.update_permission(
+        db, permission=db_obj, new_permission_name=permission.name
+    )
 
 
 @router.delete("/permission/{id}", status_code=204)

@@ -122,6 +122,14 @@ class CRUDRbac:
             db.refresh(db_obj)
         return db_objs
 
+    def update_permission(
+        self, db: Session, permission: Permission, new_permission_name: str
+    ) -> Permission:
+        permission.name = new_permission_name
+        db.commit()
+        db.refresh(permission)
+        return permission
+
     def delete_permission(self, db: Session, permission: Permission) -> None:
         role_has_permissions = self.get_all_by_permission_id(
             db, permission_id=permission.id
