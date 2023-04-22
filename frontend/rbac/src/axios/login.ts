@@ -12,7 +12,7 @@ export const login = async (
 	password: string
 ): Promise<LoginData> => {
 	try {
-		const res = await LoginAxiosInstance.post("/login", {
+		const res = await LoginAxiosInstance.post("/auth/login", {
 			email: email,
 			password: password,
 		});

@@ -1,4 +1,4 @@
-import App from "../App";
+import HomePage from "../pages/homePage";
 
 interface Route {
 	container: () => JSX.Element;
@@ -10,7 +10,7 @@ interface Route {
 
 export const routes: Route[] = [
 	{
-		container: App,
+		container: HomePage,
 		path: "/",
 		showHeader: true,
 		title: "Home",

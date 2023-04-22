@@ -1,44 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import {
-	createBrowserRouter,
-	RouteObject,
-	RouterProvider,
-} from "react-router-dom";
-import LoginPage from "./pages/loginPage";
-import ProtectedRoute from "./routes/protectedRoute";
-import { routes } from "./routes/routes";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement
 );
 
-let router: RouteObject[] = [
-	{
-		path: "/login",
-		element: <LoginPage />,
-	},
-];
-
-routes.forEach((route) => {
-	router.push({
-		path: route.path,
-		element: (
-			<ProtectedRoute>
-				<route.container />
-			</ProtectedRoute>
-		),
-	});
-});
-
 root.render(
 	<React.StrictMode>
-		<RouterProvider router={createBrowserRouter(router)} />
-		<ToastContainer />
+		<BrowserRouter>
+			<App />
+		</BrowserRouter>
 	</React.StrictMode>
 );
 
