@@ -12,12 +12,16 @@ import {
 } from "@mui/material";
 import { routes } from "../../routes/routes";
 import { useNavigate } from "react-router-dom";
+import _ from "lodash";
+import React from "react";
 
 interface ICustomDrawer {
 	children: JSX.Element;
 }
 
 const CustomDrawer = ({ children }: ICustomDrawer) => {
+	const permissions = JSON.parse(localStorage.getItem("permissions")!);
+
 	const navigate = useNavigate();
 
 	return (
@@ -44,17 +48,33 @@ const CustomDrawer = ({ children }: ICustomDrawer) => {
 				<Toolbar />
 				<Box sx={{ overflow: "auto" }}>
 					<List>
-						{routes.map((route) => (
-							<ListItem key={route.title} disablePadding>
-								<ListItemButton
-									onClick={() => navigate(route.path)}
-								>
-									<ListItemText primary={route.title} />
-								</ListItemButton>
-							</ListItem>
-						))}
+						{routes.map((route) => {
+							let isAllowed = true;
+							route.permissions.map((permission) => {
+								if (!_.includes(permissions, permission))
+									isAllowed = false;
+							});
+
+							return (
+								isAllowed && (
+									<React.Fragment key={route.title}>
+										<ListItem disablePadding>
+											<ListItemButton
+												onClick={() =>
+													navigate(route.path)
+												}
+											>
+												<ListItemText
+													primary={route.title}
+												/>
+											</ListItemButton>
+										</ListItem>
+										<Divider />
+									</React.Fragment>
+								)
+							);
+						})}
 					</List>
-					<Divider />
 				</Box>
 			</Drawer>
 			<Box sx={{ flexGrow: 1 }}>{children}</Box>

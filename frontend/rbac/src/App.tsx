@@ -6,6 +6,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/loginPage";
 import { routes } from "./routes/routes";
 import ProtectedRoute from "./routes/protectedRoute";
+import ErrorPage from "./pages/errorPage";
 
 function App() {
 	return (
@@ -42,6 +43,14 @@ function App() {
 					element={
 						<CustomDrawer>
 							<LoginPage />
+						</CustomDrawer>
+					}
+				/>
+				<Route
+					path="/error"
+					element={
+						<CustomDrawer>
+							<ErrorPage />
 						</CustomDrawer>
 					}
 				/>

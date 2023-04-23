@@ -1,4 +1,5 @@
 import HomePage from "../pages/homePage";
+import SettingPage from "../pages/settingPage";
 
 interface Route {
 	container: () => JSX.Element;
@@ -6,6 +7,7 @@ interface Route {
 	showHeader: boolean;
 	title?: string;
 	children?: Route[];
+	permissions: string[];
 }
 
 export const routes: Route[] = [
@@ -14,5 +16,13 @@ export const routes: Route[] = [
 		path: "/",
 		showHeader: true,
 		title: "Home",
+		permissions: [],
+	},
+	{
+		container: SettingPage,
+		path: "/setting",
+		showHeader: true,
+		title: "Setting",
+		permissions: ["setting.read"],
 	},
 ];

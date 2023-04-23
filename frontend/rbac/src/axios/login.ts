@@ -23,6 +23,6 @@ export const login = async (
 			toast.error("Incorrect email/password");
 			console.error({ error: error.message });
 		}
-		return { permissions: [], token: "" };
+		return {} as LoginData;
 	}
 };
