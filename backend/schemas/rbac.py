@@ -8,6 +8,14 @@ class UserCreate(BaseModel):
     password: str
 
 
+class UserOut(BaseModel):
+    id: UUID
+    email: EmailStr
+
+    class Config:
+        orm_mode = True
+
+
 # class UserInDB(BaseModel):
 #     id: UUID | None = None
 #     email: str
