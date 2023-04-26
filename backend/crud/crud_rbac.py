@@ -31,6 +31,9 @@ class CRUDRbac:
         db.refresh(db_obj)
         return db_obj
 
+    def get_users(self, db: Session) -> list[User]:
+        return db.query(User).all()
+
     # Role
     def get_role_by_name(self, db: Session, name: str) -> Role:
         return db.query(Role).filter(Role.name == name).first()

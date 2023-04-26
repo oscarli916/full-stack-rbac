@@ -28,3 +28,11 @@ async def create_user(
             error=f"user id: {db_obj.id}, user email: {db_obj.email}",
         )
     return crud.rbac.create_user(db, obj_in=user)
+
+
+@router.get("", response_model=list[UserOut], status_code=200)
+async def read_users(
+    authorization: str | None = Header(default=None), db: Session = Depends(get_db)
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.read"])
+    return crud.rbac.get_users(db)
