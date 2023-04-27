@@ -224,6 +224,8 @@ def test_update_permission(db: Session) -> None:
     )
     res = r.json()
     assert r.status_code == 200
+    assert "id" in res
+    assert "name" in res
     assert res["id"] == permission_id
     assert res["name"] == "test.update"
 
