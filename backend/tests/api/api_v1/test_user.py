@@ -1,4 +1,5 @@
 from uuid import uuid4
+
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -13,7 +14,7 @@ app.dependency_overrides[get_db] = override_get_db
 client = TestClient(app)
 
 
-def test_create_permission(db: Session) -> None:
+def test_create_user(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -30,19 +31,22 @@ def test_create_permission(db: Session) -> None:
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
 
-    permission_name = "test.create"
+    new_email = "test@test.com"
+    new_password = "12345678"
     header = {"authorization": f"Bearer {res['token']}"}
     r = client.post(
-        "/api/v1/rbac/permission", json={"name": permission_name}, headers=header
+        "/api/v1/rbac/user",
+        json={"email": new_email, "password": new_password},
+        headers=header,
     )
     res = r.json()
     assert r.status_code == 201
     assert "id" in res
-    assert "name" in res
-    assert res["name"] == permission_name
+    assert "email" in res
+    assert res["email"] == new_email
 
 
-def test_create_duplicate_permission(db: Session) -> None:
+def test_create_duplicate_user(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -59,82 +63,22 @@ def test_create_duplicate_permission(db: Session) -> None:
     r = client.post("/api/v1/auth/login", json=login_data)
     res = r.json()
 
-    permission_name = "test.create"
-    header = {"authorization": f"Bearer {res['token']}"}
-    r1 = client.post(
-        "/api/v1/rbac/permission", json={"name": permission_name}, headers=header
-    )
-    res1 = r1.json()
-
-    r2 = client.post(
-        "/api/v1/rbac/permission", json={"name": permission_name}, headers=header
-    )
-    res2 = r2.json()
-    assert r2.status_code == 400
-    assert "message" in res2
-    assert "error" in res2
-    assert res2["message"] == "permission has already been created"
-    assert (
-        res2["error"] == f"permission id: {res1['id']}, permission name: {res1['name']}"
-    )
-
-
-def test_create_permission_without_permission(db: Session) -> None:
-    email = "admin@test.com"
-    password = "12345678"
-    permissions = ["setting.read", "setting.update", "setting.delete"]
-    admin = UserCreate(email=email, password=password)
-    user = crud.rbac.create_user(db, obj_in=admin)
-    role = crud.rbac.create_role(db, role_name="admin")
-    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
-    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
-    crud.rbac.create_role_has_permission(
-        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
-    )
-
-    login_data = {"email": email, "password": password}
-    r = client.post("/api/v1/auth/login", json=login_data)
-    res = r.json()
-
-    permission_name = "test.create"
+    new_email = "admin@test.com"
+    new_password = "12345678"
     header = {"authorization": f"Bearer {res['token']}"}
     r = client.post(
-        "/api/v1/rbac/permission", json={"name": permission_name}, headers=header
+        "/api/v1/rbac/user",
+        json={"email": new_email, "password": new_password},
+        headers=header,
     )
     res = r.json()
-    assert r.status_code == 401
+    assert r.status_code == 400
     assert "message" in res
     assert "error" in res
-    assert res["message"] == "user is not authorized"
-    assert res["error"] == "user does not have permission"
+    assert res["message"] == "user has already been created"
 
 
-def test_create_permission_without_authorization() -> None:
-    permission_name = "test.create"
-    r = client.post("/api/v1/rbac/permission", json={"name": permission_name})
-    res = r.json()
-    assert r.status_code == 401
-    assert "message" in res
-    assert "error" in res
-    assert res["message"] == "user is not authorized"
-    assert res["error"] == "header does not start with Bearer"
-
-
-def test_create_permission_with_wrong_authorization() -> None:
-    permission_name = "test.create"
-    header = {"authorization": ""}
-    r = client.post(
-        "/api/v1/rbac/permission", json={"name": permission_name}, headers=header
-    )
-    res = r.json()
-    assert r.status_code == 401
-    assert "message" in res
-    assert "error" in res
-    assert res["message"] == "user is not authorized"
-    assert res["error"] == "header does not start with Bearer"
-
-
-def test_read_permissions(db: Session) -> None:
+def test_read_users(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -152,15 +96,17 @@ def test_read_permissions(db: Session) -> None:
     res = r.json()
 
     header = {"authorization": f"Bearer {res['token']}"}
-    r = client.get("/api/v1/rbac/permission", headers=header)
+    r = client.get("/api/v1/rbac/user", headers=header)
     res = r.json()
     assert r.status_code == 200
-    for idx, permission in enumerate(res):
-        assert permission["id"] == str(db_objs[idx].id)
-        assert permission["name"] == db_objs[idx].name
+    assert len(res) == 1
+    assert "id" in res[0]
+    assert "email" in res[0]
+    assert res[0]["id"] == str(user.id)
+    assert res[0]["email"] == email
 
 
-def test_update_not_found_permission(db: Session) -> None:
+def test_update_not_found_user(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -180,17 +126,17 @@ def test_update_not_found_permission(db: Session) -> None:
     uuid = uuid4()
     header = {"authorization": f"Bearer {res['token']}"}
     r = client.patch(
-        f"/api/v1/rbac/permission/{uuid}", json={"name": "test.update"}, headers=header
+        f"/api/v1/rbac/user/{uuid}", json={"email": "test@test.com"}, headers=header
     )
     res = r.json()
     assert r.status_code == 404
     assert "message" in res
     assert "error" in res
-    assert res["message"] == "permission not found"
-    assert res["error"] == f"no permission id: {uuid}"
+    assert res["message"] == "user not found"
+    assert res["error"] == f"no user id: {uuid}"
 
 
-def test_update_permission(db: Session) -> None:
+def test_update_user(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -209,26 +155,20 @@ def test_update_permission(db: Session) -> None:
     token = res["token"]
 
     header = {"authorization": f"Bearer {token}"}
-    r = client.get("/api/v1/rbac/permission", headers=header)
-    res = r.json()
-    for permission in res:
-        if permission["name"] == "setting.update":
-            permission_id = permission["id"]
-            break
-
-    header = {"authorization": f"Bearer {token}"}
     r = client.patch(
-        f"/api/v1/rbac/permission/{permission_id}",
-        json={"name": "test.update"},
+        f"/api/v1/rbac/user/{user.id}",
+        json={"email": "test@test.com"},
         headers=header,
     )
     res = r.json()
     assert r.status_code == 200
-    assert res["id"] == permission_id
-    assert res["name"] == "test.update"
+    assert "id" in res
+    assert "email" in res
+    assert res["id"] == str(user.id)
+    assert res["email"] == "test@test.com"
 
 
-def test_delete_not_found_permission(db: Session) -> None:
+def test_delete_not_found_user(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -247,33 +187,29 @@ def test_delete_not_found_permission(db: Session) -> None:
 
     uuid = uuid4()
     header = {"authorization": f"Bearer {res['token']}"}
-    r = client.delete(f"/api/v1/rbac/permission/{uuid}", headers=header)
+    r = client.delete(f"/api/v1/rbac/user/{uuid}", headers=header)
     res = r.json()
     assert r.status_code == 404
     assert "message" in res
     assert "error" in res
-    assert res["message"] == "permission not found"
-    assert res["error"] == f"no permission id: {uuid}"
+    assert res["message"] == "user not found"
+    assert res["error"] == f"no user id: {uuid}"
 
 
-def test_delete_permission_without_forign_key_constraint(db: Session) -> None:
+def test_delete_user_without_forign_key_constraint(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
-    permissions = [
-        "setting.create",
-        "setting.read",
-        "setting.update",
-        "setting.delete",
-        "test.delete",
-    ]
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
     admin = UserCreate(email=email, password=password)
     user = crud.rbac.create_user(db, obj_in=admin)
     role = crud.rbac.create_role(db, role_name="admin")
     crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
     db_objs = crud.rbac.create_permissions(db, permissions=permissions)
     crud.rbac.create_role_has_permission(
-        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs[:-1]]
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
     )
+    test_user = UserCreate(email="test@test.com", password=password)
+    crud.rbac.create_user(db, obj_in=test_user)
 
     login_data = {"email": email, "password": password}
     r = client.post("/api/v1/auth/login", json=login_data)
@@ -281,22 +217,18 @@ def test_delete_permission_without_forign_key_constraint(db: Session) -> None:
     token = res["token"]
 
     header = {"authorization": f"Bearer {token}"}
-    r = client.get("/api/v1/rbac/permission", headers=header)
+    r = client.get("/api/v1/rbac/user", headers=header)
     res = r.json()
-    for permission in res:
-        if permission["name"] == "test.delete":
-            permission_id = permission["id"]
+    for user in res:
+        if user["email"] == "test@test.com":
+            user_id = user["id"]
             break
 
-    header = {"authorization": f"Bearer {token}"}
-    r = client.delete(
-        f"/api/v1/rbac/permission/{permission_id}",
-        headers=header,
-    )
+    r = client.delete(f"/api/v1/rbac/user/{user_id}", headers=header)
     assert r.status_code == 204
 
 
-def test_delete_permission_with_forign_key_constraint(db: Session) -> None:
+def test_delete_user_with_forign_key_constraint(db: Session) -> None:
     email = "admin@test.com"
     password = "12345678"
     permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
@@ -315,16 +247,8 @@ def test_delete_permission_with_forign_key_constraint(db: Session) -> None:
     token = res["token"]
 
     header = {"authorization": f"Bearer {token}"}
-    r = client.get("/api/v1/rbac/permission", headers=header)
-    res = r.json()
-    for permission in res:
-        if permission["name"] == "setting.delete":
-            permission_id = permission["id"]
-            break
-
-    header = {"authorization": f"Bearer {token}"}
     r = client.delete(
-        f"/api/v1/rbac/permission/{permission_id}",
+        f"/api/v1/rbac/user/{user.id}",
         headers=header,
     )
     assert r.status_code == 204

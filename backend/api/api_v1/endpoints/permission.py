@@ -14,7 +14,7 @@ from utils.security import verify_permission
 router = APIRouter()
 
 
-@router.post("/permission", response_model=PermissionOut, status_code=201)
+@router.post("", response_model=PermissionOut, status_code=201)
 async def create_permission(
     permission: PermissionCreate,
     authorization: str | None = Header(default=None),
@@ -31,7 +31,7 @@ async def create_permission(
     return crud.rbac.create_permissions(db, permissions=[permission.name])[0]
 
 
-@router.get("/permission", response_model=list[PermissionOut], status_code=200)
+@router.get("", response_model=list[PermissionOut], status_code=200)
 async def read_permissions(
     authorization: str | None = Header(default=None), db: Session = Depends(get_db)
 ) -> Any:
@@ -39,7 +39,7 @@ async def read_permissions(
     return crud.rbac.get_permissions(db)
 
 
-@router.patch("/permission/{id}", response_model=PermissionOut, status_code=200)
+@router.patch("/{id}", response_model=PermissionOut, status_code=200)
 async def update_permission(
     id: UUID,
     permission: PermissionCreate,
@@ -59,7 +59,7 @@ async def update_permission(
     )
 
 
-@router.delete("/permission/{id}", status_code=204)
+@router.delete("/{id}", status_code=204)
 async def delete_permission(
     id: UUID,
     authorization: str | None = Header(default=None),
