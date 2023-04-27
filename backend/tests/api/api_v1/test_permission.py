@@ -216,7 +216,6 @@ def test_update_permission(db: Session) -> None:
             permission_id = permission["id"]
             break
 
-    header = {"authorization": f"Bearer {token}"}
     r = client.patch(
         f"/api/v1/rbac/permission/{permission_id}",
         json={"name": "test.update"},
@@ -290,7 +289,6 @@ def test_delete_permission_without_forign_key_constraint(db: Session) -> None:
             permission_id = permission["id"]
             break
 
-    header = {"authorization": f"Bearer {token}"}
     r = client.delete(
         f"/api/v1/rbac/permission/{permission_id}",
         headers=header,
@@ -324,7 +322,6 @@ def test_delete_permission_with_forign_key_constraint(db: Session) -> None:
             permission_id = permission["id"]
             break
 
-    header = {"authorization": f"Bearer {token}"}
     r = client.delete(
         f"/api/v1/rbac/permission/{permission_id}",
         headers=header,
