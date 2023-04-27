@@ -55,3 +55,20 @@ async def update_role(
             error=f"no role id: {id}",
         )
     return crud.rbac.update_role(db, role=db_obj, new_role_name=role.name)
+
+
+@router.delete("/{id}", status_code=204)
+async def delete_role(
+    id: UUID,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    await verify_permission(db, authorization, permissions=["setting.delete"])
+    db_obj = crud.rbac.get_role_by_id(db, role_id=id)
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="role not found",
+            error=f"no role id: {id}",
+        )
+    crud.rbac.delete_role(db, role=db_obj)
