@@ -1,13 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-	createPermission,
-	getPermissions,
-	removePermission,
-	updatePermission,
-} from "../axios/permission";
-import { PermissionData } from "../schemas/permission";
-import { Box, Button, Modal, TextField, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import { UserData } from "../schemas/user";
+import { createUser, getUsers, removeUser, updateUser } from "../axios/user";
 import {
 	DataGrid,
 	GridActionsCellItem,
@@ -18,25 +11,28 @@ import {
 	MuiBaseEvent,
 	MuiEvent,
 } from "@mui/x-data-grid";
-import AddToolBar from "../components/Rbac/addToolBar";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import _ from "lodash";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import AddToolBar from "../components/Rbac";
 
-const PermissionPage = () => {
-	const [permissionData, setPermissionData] = useState<PermissionData[]>([]);
+const UserPage = () => {
+	const [userData, setUserData] = useState<UserData[]>([]);
 	const [modalOpen, setModalOpen] = useState(false);
-	const [newPermission, setNewPermission] = useState("");
+	const [newEmail, setNewEmail] = useState("");
+	const [newPassword, setNewPassword] = useState("");
 
 	const jwt = localStorage.getItem("token");
 	const permissions = JSON.parse(localStorage.getItem("permissions")!);
 
-	const rows: GridRowsProp = permissionData;
+	const rows: GridRowsProp = userData;
 
 	const columns: GridColDef[] = [
 		{ field: "id", headerName: "ID", width: 150 },
 		{
-			field: "name",
-			headerName: "Name",
-			width: 150,
+			field: "email",
+			headerName: "Email",
+			width: 200,
 			editable: _.includes(permissions, "setting.update") ? true : false,
 		},
 		{
@@ -44,13 +40,13 @@ const PermissionPage = () => {
 			type: "actions",
 			headerName: "Delete",
 			width: 150,
-			getActions: (params: GridRowParams<PermissionData>) => [
+			getActions: (params: GridRowParams<UserData>) => [
 				<GridActionsCellItem
 					icon={<DeleteIcon />}
 					label="Delete"
 					onClick={async () => {
-						await removePermission(params.id.toString(), jwt);
-						await getPermissionData();
+						await removeUser(params.id.toString(), jwt);
+						await getUserData();
 					}}
 					color="inherit"
 				/>,
@@ -58,13 +54,13 @@ const PermissionPage = () => {
 		},
 	];
 
-	const getPermissionData = useCallback(async () => {
-		setPermissionData(await getPermissions(jwt));
+	const getUserData = useCallback(async () => {
+		setUserData(await getUsers(jwt));
 	}, [jwt]);
 
 	useEffect(() => {
-		getPermissionData();
-	}, [getPermissionData]);
+		getUserData();
+	}, [getUserData]);
 
 	return (
 		<Box
@@ -97,12 +93,8 @@ const PermissionPage = () => {
 								.target as HTMLInputElement
 						).value;
 						if (newValue === params.value) return;
-						await updatePermission(
-							params.id.toString(),
-							newValue,
-							jwt
-						);
-						await getPermissionData();
+						await updateUser(params.id.toString(), newValue, jwt);
+						await getUserData();
 					}}
 					slots={{
 						toolbar: _.includes(permissions, "setting.create")
@@ -112,7 +104,7 @@ const PermissionPage = () => {
 					slotProps={{
 						toolbar: {
 							openModal: () => setModalOpen(true),
-							children: "Add Permission",
+							children: "Add User",
 						},
 					}}
 				/>
@@ -133,24 +125,38 @@ const PermissionPage = () => {
 					}}
 				>
 					<Typography variant="h5" sx={{ mb: 5 }}>
-						Create New Permission
+						Create New User
 					</Typography>
 					<TextField
-						label="Permission Name"
+						label="User Email"
+						margin="normal"
 						variant="outlined"
-						value={newPermission}
+						value={newEmail}
 						onChange={(
 							event: React.ChangeEvent<HTMLInputElement>
 						) => {
-							setNewPermission(event.target.value);
+							setNewEmail(event.target.value);
+						}}
+					/>
+					<TextField
+						label="User Password"
+						margin="normal"
+						type="password"
+						variant="outlined"
+						value={newPassword}
+						onChange={(
+							event: React.ChangeEvent<HTMLInputElement>
+						) => {
+							setNewPassword(event.target.value);
 						}}
 					/>
 					<Button
 						variant="contained"
-						sx={{ ml: 5, height: 50 }}
+						sx={{ mt: 2, ml: 5, height: 50 }}
 						onClick={async () => {
-							await createPermission(newPermission, jwt);
-							await getPermissionData();
+							await createUser(newEmail, newPassword, jwt);
+							await getUserData();
+							console.log(newEmail, newPassword);
 							setModalOpen(false);
 						}}
 					>
@@ -162,4 +168,4 @@ const PermissionPage = () => {
 	);
 };
 
-export default PermissionPage;
+export default UserPage;

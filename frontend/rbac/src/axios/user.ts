@@ -1,27 +1,28 @@
 import axios from "axios";
+import { UserData } from "../schemas/user";
 import { toast } from "react-toastify";
-import { PermissionData } from "../schemas/permission";
 
-const RbacAxiosInstance = axios.create({
-	baseURL: `${process.env.REACT_APP_BACKEND_BASE_URL}/rbac`,
+const RbacUserAxiosInstance = axios.create({
+	baseURL: `${process.env.REACT_APP_BACKEND_BASE_URL}/rbac/user`,
 	headers: { "Content-Type": "application/json" },
 });
 
-export const createPermission = async (
-	value: string,
+export const createUser = async (
+	email: string,
+	password: string,
 	token: string | null
 ): Promise<void> => {
 	try {
-		await RbacAxiosInstance.post(
-			"/permission",
-			{ name: value },
+		await RbacUserAxiosInstance.post(
+			"",
+			{ email: email, password: password },
 			{
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			}
 		);
-		toast.success("Permission Created");
+		toast.success("User Created");
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			toast.error("you are not authorized");
@@ -30,11 +31,9 @@ export const createPermission = async (
 	}
 };
 
-export const getPermissions = async (
-	token: string | null
-): Promise<PermissionData[]> => {
+export const getUsers = async (token: string | null): Promise<UserData[]> => {
 	try {
-		const res = await RbacAxiosInstance.get("/permission", {
+		const res = await RbacUserAxiosInstance.get("", {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
@@ -45,26 +44,26 @@ export const getPermissions = async (
 			toast.error("you are not authorized");
 			console.error({ error: error.message });
 		}
-		return [] as PermissionData[];
+		return [] as UserData[];
 	}
 };
 
-export const updatePermission = async (
+export const updateUser = async (
 	id: string,
 	value: string,
 	token: string | null
 ): Promise<void> => {
 	try {
-		await RbacAxiosInstance.patch(
-			`/permission/${id}`,
-			{ name: value },
+		await RbacUserAxiosInstance.patch(
+			`/${id}`,
+			{ email: value },
 			{
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},
 			}
 		);
-		toast.success("Permission name Updated");
+		toast.success("User email Updated");
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			toast.error("you are not authorized");
@@ -73,17 +72,17 @@ export const updatePermission = async (
 	}
 };
 
-export const removePermission = async (
+export const removeUser = async (
 	id: string,
 	token: string | null
 ): Promise<void> => {
 	try {
-		await RbacAxiosInstance.delete(`/permission/${id}`, {
+		await RbacUserAxiosInstance.delete(`/${id}`, {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
 		});
-		toast.success("Permission Deleted");
+		toast.success("User Deleted");
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			toast.error("you are not authorized");
