@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
@@ -36,3 +37,21 @@ async def read_roles(
 ) -> Any:
     await verify_permission(db, authorization, permissions=["setting.read"])
     return crud.rbac.get_roles(db)
+
+
+@router.patch("/{id}", response_model=RoleOut, status_code=200)
+async def update_role(
+    id: UUID,
+    role: RoleCreate,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.update"])
+    db_obj = crud.rbac.get_role_by_id(db, role_id=id)
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="role not found",
+            error=f"no role id: {id}",
+        )
+    return crud.rbac.update_role(db, role=db_obj, new_role_name=role.name)
