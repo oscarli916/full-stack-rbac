@@ -69,3 +69,31 @@ def test_create_duplicate_role(db: Session) -> None:
     assert "error" in res2
     assert res2["message"] == "role has already been created"
     assert res2["error"] == f"role id: {res1['id']}, role name: {res1['name']}"
+
+
+def test_read_roles(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+
+    header = {"authorization": f"Bearer {res['token']}"}
+    r = client.get("/api/v1/rbac/role", headers=header)
+    res = r.json()
+    assert r.status_code == 200
+    assert len(res) == 1
+    assert "id" in res[0]
+    assert "name" in res[0]
+    assert res[0]["id"] == str(role.id)
+    assert res[0]["name"] == "admin"
