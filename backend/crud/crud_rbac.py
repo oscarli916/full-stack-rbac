@@ -61,7 +61,42 @@ class CRUDRbac:
         db.refresh(db_obj)
         return db_obj
 
+    def get_roles(self, db: Session) -> list[Role]:
+        return db.query(Role).all()
+
+    def get_role_by_id(self, db: Session, role_id: UUID) -> Role | None:
+        return db.query(Role).filter(Role.id == role_id).first()
+
+    def update_role(self, db: Session, role: Role, new_role_name: str) -> Role:
+        role.name = new_role_name
+        db.commit()
+        db.refresh(role)
+        return role
+
+    def delete_role(self, db: Session, role: Role) -> None:
+        user_has_roles = self.get_all_user_has_role_by_role_id(db, role_id=role.id)
+        for user_has_role in user_has_roles:
+            self.delete_user_has_role(db, user_has_role)
+
+        role_has_permissions = self.get_all_role_has_permission_by_role_id(
+            db, role_id=role.id
+        )
+        for role_has_permission in role_has_permissions:
+            self.delete_role_has_permission(db, role_has_permission)
+
+        db.delete(role)
+        db.commit()
+
     # RoleHasPermission
+    def get_all_role_has_permission_by_role_id(
+        self, db: Session, role_id: UUID
+    ) -> list[RoleHasPermission]:
+        return (
+            db.query(RoleHasPermission)
+            .filter(RoleHasPermission.role_id == role_id)
+            .all()
+        )
+
     def get_all_by_permission_id(
         self, db: Session, permission_id: UUID
     ) -> list[RoleHasPermission]:
@@ -109,6 +144,11 @@ class CRUDRbac:
         self, db: Session, user_id: UUID
     ) -> list[UserHasRole]:
         return db.query(UserHasRole).filter(UserHasRole.user_id == user_id).all()
+
+    def get_all_user_has_role_by_role_id(
+        self, db: Session, role_id: UUID
+    ) -> list[UserHasRole]:
+        return db.query(UserHasRole).filter(UserHasRole.role_id == role_id).all()
 
     def create_user_has_role(
         self, db: Session, user_id: UUID, role_id: UUID

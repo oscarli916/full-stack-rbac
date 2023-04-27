@@ -39,3 +39,15 @@ class PermissionOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class RoleCreate(BaseModel):
+    name: str
+
+
+class RoleOut(BaseModel):
+    id: UUID
+    name: str
+
+    class Config:
+        orm_mode = True
