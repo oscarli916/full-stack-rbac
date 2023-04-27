@@ -4,12 +4,13 @@ import { GridToolbarContainer } from "@mui/x-data-grid";
 
 interface IAddToolBar {
 	openModal: () => void;
+	children?: React.ReactNode;
 }
 
-const AddToolBar = ({ openModal }: IAddToolBar) => (
+const AddToolBar = ({ openModal, children }: IAddToolBar) => (
 	<GridToolbarContainer>
 		<Button startIcon={<AddIcon />} onClick={openModal}>
-			Add permission
+			{children}
 		</Button>
 	</GridToolbarContainer>
 );

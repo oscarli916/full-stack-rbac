@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { auth } from "../utils/auth";
 import PermissionPage from "./permissionPage";
 import _ from "lodash";
+import UserPage from "./userPage";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -35,7 +36,9 @@ const SettingPage = () => {
 					value={value}
 					onChange={(_, newValue) => setValue(newValue)}
 				>
-					<Tab label="User" />
+					{_.includes(permissions, "setting.read") && (
+						<Tab label="User" />
+					)}
 					<Tab label="Role" />
 					{_.includes(permissions, "setting.read") && (
 						<Tab label="Permission" />
@@ -43,7 +46,7 @@ const SettingPage = () => {
 				</Tabs>
 			</Box>
 			<TabPanel value={value} index={0}>
-				<Typography>User</Typography>
+				<UserPage />
 			</TabPanel>
 			<TabPanel value={value} index={1}>
 				Role
