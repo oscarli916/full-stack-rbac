@@ -16,6 +16,10 @@ class UserOut(BaseModel):
         orm_mode = True
 
 
+class UserUpdate(BaseModel):
+    email: EmailStr
+
+
 # class UserInDB(BaseModel):
 #     id: UUID | None = None
 #     email: str

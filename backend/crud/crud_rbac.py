@@ -34,6 +34,15 @@ class CRUDRbac:
     def get_users(self, db: Session) -> list[User]:
         return db.query(User).all()
 
+    def get_user_by_id(self, db: Session, user_id: UUID) -> User | None:
+        return db.query(User).filter(User.id == user_id).first()
+
+    def update_user(self, db: Session, user: User, new_email: str) -> User:
+        user.email = new_email
+        db.commit()
+        db.refresh(user)
+        return user
+
     # Role
     def get_role_by_name(self, db: Session, name: str) -> Role:
         return db.query(Role).filter(Role.name == name).first()

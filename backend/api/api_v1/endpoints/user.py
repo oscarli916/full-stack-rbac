@@ -1,11 +1,12 @@
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 
 from api.deps import get_db
 import crud
-from schemas.rbac import UserCreate, UserOut
+from schemas.rbac import UserCreate, UserOut, UserUpdate
 from utils.exception import UvicornException
 from utils.security import verify_permission
 
@@ -36,3 +37,21 @@ async def read_users(
 ) -> Any:
     await verify_permission(db, authorization, permissions=["setting.read"])
     return crud.rbac.get_users(db)
+
+
+@router.patch("/{id}", response_model=UserOut, status_code=200)
+async def update_user(
+    id: UUID,
+    user: UserUpdate,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.update"])
+    db_obj = crud.rbac.get_user_by_id(db, user_id=id)
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="user not found",
+            error=f"no user id: {id}",
+        )
+    return crud.rbac.update_user(db, user=db_obj, new_email=user.email)
