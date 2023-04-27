@@ -55,3 +55,20 @@ async def update_user(
             error=f"no user id: {id}",
         )
     return crud.rbac.update_user(db, user=db_obj, new_email=user.email)
+
+
+@router.delete("/{id}", status_code=204)
+async def delete_user(
+    id: UUID,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    await verify_permission(db, authorization, permissions=["setting.delete"])
+    db_obj = crud.rbac.get_user_by_id(db, user_id=id)
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="user not found",
+            error=f"no user id: {id}",
+        )
+    crud.rbac.delete_user(db, user=db_obj)

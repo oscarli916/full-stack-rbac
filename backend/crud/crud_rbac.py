@@ -43,6 +43,13 @@ class CRUDRbac:
         db.refresh(user)
         return user
 
+    def delete_user(self, db: Session, user: User) -> None:
+        user_has_roles = self.get_all_user_has_role_by_user_id(db, user_id=user.id)
+        for user_has_role in user_has_roles:
+            self.delete_user_has_role(db, user_has_role)
+        db.delete(user)
+        db.commit()
+
     # Role
     def get_role_by_name(self, db: Session, name: str) -> Role:
         return db.query(Role).filter(Role.name == name).first()
@@ -98,6 +105,11 @@ class CRUDRbac:
         )
         return [role_id[0] for role_id in role_ids]
 
+    def get_all_user_has_role_by_user_id(
+        self, db: Session, user_id: UUID
+    ) -> list[UserHasRole]:
+        return db.query(UserHasRole).filter(UserHasRole.user_id == user_id).all()
+
     def create_user_has_role(
         self, db: Session, user_id: UUID, role_id: UUID
     ) -> UserHasRole:
@@ -106,6 +118,10 @@ class CRUDRbac:
         db.commit()
         db.refresh(db_obj)
         return db_obj
+
+    def delete_user_has_role(self, db: Session, user_has_role: UserHasRole) -> None:
+        db.delete(user_has_role)
+        db.commit()
 
     # Permission
     def get_permission_name_by_id(self, db: Session, permission_id: UUID) -> str:
