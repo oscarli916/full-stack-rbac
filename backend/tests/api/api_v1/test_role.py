@@ -164,3 +164,85 @@ def test_update_role(db: Session) -> None:
     assert "name" in res
     assert res["id"] == role_id
     assert res["name"] == "test"
+
+
+def test_delete_not_found_role(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+
+    uuid = uuid4()
+    header = {"authorization": f"Bearer {res['token']}"}
+    r = client.delete(f"/api/v1/rbac/role/{uuid}", headers=header)
+    res = r.json()
+    assert r.status_code == 404
+    assert "message" in res
+    assert "error" in res
+    assert res["message"] == "role not found"
+    assert res["error"] == f"no role id: {uuid}"
+
+
+def test_delete_role_without_forign_key_constraint(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    test_role = crud.rbac.create_role(db, role_name="test")
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+    token = res["token"]
+
+    header = {"authorization": f"Bearer {token}"}
+    r = client.delete(
+        f"/api/v1/rbac/role/{test_role.id}",
+        headers=header,
+    )
+    assert r.status_code == 204
+
+
+def test_delete_role_with_forign_key_constraint(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+    token = res["token"]
+
+    header = {"authorization": f"Bearer {token}"}
+    r = client.delete(
+        f"/api/v1/rbac/role/{role.id}",
+        headers=header,
+    )
+    assert r.status_code == 204
