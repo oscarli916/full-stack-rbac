@@ -61,6 +61,9 @@ class CRUDRbac:
         db.refresh(db_obj)
         return db_obj
 
+    def get_roles(self, db: Session) -> list[Role]:
+        return db.query(Role).all()
+
     # RoleHasPermission
     def get_all_by_permission_id(
         self, db: Session, permission_id: UUID

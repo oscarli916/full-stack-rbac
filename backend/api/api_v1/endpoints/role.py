@@ -28,3 +28,11 @@ async def create_role(
             error=f"role id: {db_obj.id}, role name: {db_obj.name}",
         )
     return crud.rbac.create_role(db, role_name=role.name)
+
+
+@router.get("", response_model=list[RoleOut], status_code=200)
+async def read_roles(
+    authorization: str | None = Header(default=None), db: Session = Depends(get_db)
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.read"])
+    return crud.rbac.get_roles(db)
