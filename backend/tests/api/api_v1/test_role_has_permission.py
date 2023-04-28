@@ -77,7 +77,7 @@ def test_create_role_has_permission_invalid_role_id(db: Session) -> None:
     assert "message" in res
     assert "error" in res
     assert res["message"] == "role not found"
-    assert res["error"] == f"role id: {uuid}"
+    assert res["error"] == f"no role id: {uuid}"
 
 
 def test_create_role_has_permission_invalid_permission_id(db: Session) -> None:
@@ -109,7 +109,7 @@ def test_create_role_has_permission_invalid_permission_id(db: Session) -> None:
     assert "message" in res
     assert "error" in res
     assert res["message"] == "permission not found"
-    assert res["error"] == f"permission id: {uuid}"
+    assert res["error"] == f"no permission id: {uuid}"
 
 
 def test_create_duplicate_role_has_permission(db: Session) -> None:
@@ -140,7 +140,7 @@ def test_create_duplicate_role_has_permission(db: Session) -> None:
     assert "message" in res
     assert "error" in res
     assert res["message"] == "role has permission has already been created"
-    assert res["error"] == f"role id: {role.id}, permission id: {db_objs[0].id}"
+    assert res["error"] == f"no role id: {role.id}, permission id: {db_objs[0].id}"
 
 
 def test_read_role_has_permissions(db: Session) -> None:
@@ -242,7 +242,7 @@ def test_update_role_has_permission_invalid_role_id(db: Session) -> None:
     assert "message" in res
     assert "error" in res
     assert res["message"] == "role not found"
-    assert res["error"] == f"role id: {uuid}"
+    assert res["error"] == f"no role id: {uuid}"
 
 
 def test_update_role_has_permission_invalid_permission_id(db: Session) -> None:
@@ -278,7 +278,7 @@ def test_update_role_has_permission_invalid_permission_id(db: Session) -> None:
     assert "message" in res
     assert "error" in res
     assert res["message"] == "permission not found"
-    assert res["error"] == f"permission id: {uuid}"
+    assert res["error"] == f"no permission id: {uuid}"
 
 
 def test_update_not_found_role_has_permission(db: Session) -> None:
@@ -316,4 +316,4 @@ def test_update_not_found_role_has_permission(db: Session) -> None:
     assert "message" in res
     assert "error" in res
     assert res["message"] == "role has permission not found"
-    assert res["error"] == f"role id: {role.id}, permission id: {uuid}"
+    assert res["error"] == f"no role id: {role.id}, permission id: {uuid}"

@@ -25,7 +25,7 @@ async def create_role_has_permission(
         raise UvicornException(
             status_code=404,
             message="role not found",
-            error=f"role id: {role_has_permission.role_id}",
+            error=f"no role id: {role_has_permission.role_id}",
         )
     if (
         crud.rbac.get_permission_by_id(
@@ -36,7 +36,7 @@ async def create_role_has_permission(
         raise UvicornException(
             status_code=404,
             message="permission not found",
-            error=f"permission id: {role_has_permission.permission_id}",
+            error=f"no permission id: {role_has_permission.permission_id}",
         )
     db_obj = crud.rbac.get_role_has_permission_by_role_id_and_permission_id(
         db,
@@ -47,7 +47,7 @@ async def create_role_has_permission(
         raise UvicornException(
             status_code=400,
             message="role has permission has already been created",
-            error=f"role id: {db_obj.role_id}, permission id: {db_obj.permission_id}",
+            error=f"no role id: {db_obj.role_id}, permission id: {db_obj.permission_id}",
         )
     return crud.rbac.create_role_has_permission(
         db,
@@ -82,7 +82,7 @@ async def update_role_has_permission(
         raise UvicornException(
             status_code=404,
             message="role not found",
-            error=f"role id: {id}",
+            error=f"no role id: {id}",
         )
     if (
         crud.rbac.get_permission_by_id(
@@ -93,7 +93,7 @@ async def update_role_has_permission(
         raise UvicornException(
             status_code=404,
             message="permission not found",
-            error=f"permission id: {permission_update.new_permission_id}",
+            error=f"no permission id: {permission_update.new_permission_id}",
         )
     db_obj = crud.rbac.get_role_has_permission_by_role_id_and_permission_id(
         db,
@@ -104,7 +104,7 @@ async def update_role_has_permission(
         raise UvicornException(
             status_code=404,
             message="role has permission not found",
-            error=f"role id: {id}, permission id: {permission_update.old_permission_id}",
+            error=f"no role id: {id}, permission id: {permission_update.old_permission_id}",
         )
     return crud.rbac.update_role_has_permission(
         db,
