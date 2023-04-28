@@ -168,3 +168,152 @@ def test_read_role_has_permissions(db: Session) -> None:
     for idx, permission in enumerate(res):
         assert permission["id"] == str(db_objs[idx].id)
         assert permission["name"] == db_objs[idx].name
+
+
+def test_update_role_has_permission(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+    token = res["token"]
+
+    test_permission = crud.rbac.create_permissions(db, permissions=["test"])[0]
+
+    header = {"authorization": f"Bearer {token}"}
+    r = client.patch(
+        f"/api/v1/rbac/role-has-permission/{role.id}",
+        json={
+            "old_permission_id": str(db_objs[0].id),
+            "new_permission_id": str(test_permission.id),
+        },
+        headers=header,
+    )
+    res = r.json()
+    assert r.status_code == 200
+    assert "role_id" in res
+    assert "permission_id" in res
+    assert res["role_id"] == str(role.id)
+    assert res["permission_id"] == str(test_permission.id)
+
+
+def test_update_role_has_permission_invalid_role_id(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+    token = res["token"]
+
+    test_permission = crud.rbac.create_permissions(db, permissions=["test"])[0]
+
+    uuid = uuid4()
+    header = {"authorization": f"Bearer {token}"}
+    r = client.patch(
+        f"/api/v1/rbac/role-has-permission/{uuid}",
+        json={
+            "old_permission_id": str(db_objs[0].id),
+            "new_permission_id": str(test_permission.id),
+        },
+        headers=header,
+    )
+    res = r.json()
+    assert r.status_code == 404
+    assert "message" in res
+    assert "error" in res
+    assert res["message"] == "role not found"
+    assert res["error"] == f"role id: {uuid}"
+
+
+def test_update_role_has_permission_invalid_permission_id(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+    token = res["token"]
+
+    uuid = uuid4()
+    header = {"authorization": f"Bearer {token}"}
+    r = client.patch(
+        f"/api/v1/rbac/role-has-permission/{role.id}",
+        json={
+            "old_permission_id": str(db_objs[0].id),
+            "new_permission_id": str(uuid),
+        },
+        headers=header,
+    )
+    res = r.json()
+    assert r.status_code == 404
+    assert "message" in res
+    assert "error" in res
+    assert res["message"] == "permission not found"
+    assert res["error"] == f"permission id: {uuid}"
+
+
+def test_update_not_found_role_has_permission(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+    token = res["token"]
+
+    test_permission = crud.rbac.create_permissions(db, permissions=["test"])[0]
+
+    uuid = uuid4()
+    header = {"authorization": f"Bearer {token}"}
+    r = client.patch(
+        f"/api/v1/rbac/role-has-permission/{role.id}",
+        json={
+            "old_permission_id": str(uuid),
+            "new_permission_id": str(test_permission.id),
+        },
+        headers=header,
+    )
+    res = r.json()
+    assert r.status_code == 404
+    assert "message" in res
+    assert "error" in res
+    assert res["message"] == "role has permission not found"
+    assert res["error"] == f"role id: {role.id}, permission id: {uuid}"
