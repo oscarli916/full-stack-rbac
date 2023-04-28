@@ -14,7 +14,7 @@ import {
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import _ from "lodash";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
-import AddToolBar from "../components/Rbac";
+import { AddToolBar } from "../components/Rbac";
 
 const UserPage = () => {
 	const [userData, setUserData] = useState<UserData[]>([]);
@@ -159,6 +159,8 @@ const UserPage = () => {
 							await getUserData();
 							console.log(newEmail, newPassword);
 							setModalOpen(false);
+							setNewEmail("");
+							setNewPassword("");
 						}}
 					>
 						Add

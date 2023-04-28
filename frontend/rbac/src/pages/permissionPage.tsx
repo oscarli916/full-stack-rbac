@@ -18,7 +18,7 @@ import {
 	MuiBaseEvent,
 	MuiEvent,
 } from "@mui/x-data-grid";
-import AddToolBar from "../components/Rbac/addToolBar";
+import { AddToolBar } from "../components/Rbac";
 import _ from "lodash";
 
 const PermissionPage = () => {
@@ -153,6 +153,7 @@ const PermissionPage = () => {
 							await createPermission(newPermission, jwt);
 							await getPermissionData();
 							setModalOpen(false);
+							setNewPermission("");
 						}}
 					>
 						Add

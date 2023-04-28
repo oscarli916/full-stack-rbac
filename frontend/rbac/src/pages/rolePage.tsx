@@ -14,12 +14,17 @@ import {
 	MuiEvent,
 } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import AddToolBar from "../components/Rbac";
+import EditIcon from "@mui/icons-material/Edit";
+import { AddToolBar, RoleHasPermissionModal } from "../components/Rbac";
 
 const RolePage = () => {
 	const [roleData, setRoleData] = useState<RoleData[]>([]);
 	const [modalOpen, setModalOpen] = useState(false);
+	const [roleHasPermissionModalOpen, setRoleHasPermissionModalOpen] =
+		useState(false);
 	const [newRole, setNewRole] = useState("");
+	const [roleHasPermission, setRoleHasPermission] = useState("");
+	const [roleHasPermissionId, setRoleHasPermissionId] = useState("");
 
 	const jwt = localStorage.getItem("token");
 	const permissions = JSON.parse(localStorage.getItem("permissions")!);
@@ -37,9 +42,18 @@ const RolePage = () => {
 		{
 			field: "actions",
 			type: "actions",
-			headerName: "Delete",
+			headerName: "Edit/Delete",
 			width: 150,
 			getActions: (params: GridRowParams<RoleData>) => [
+				<GridActionsCellItem
+					icon={<EditIcon />}
+					label="Edit"
+					onClick={() => {
+						setRoleHasPermission(params.row.name);
+						setRoleHasPermissionId(params.id.toString());
+						setRoleHasPermissionModalOpen(true);
+					}}
+				/>,
 				<GridActionsCellItem
 					icon={<DeleteIcon />}
 					label="Delete"
@@ -144,11 +158,22 @@ const RolePage = () => {
 							await createRole(newRole, jwt);
 							await getRoleData();
 							setModalOpen(false);
+							setNewRole("");
 						}}
 					>
 						Add
 					</Button>
 				</Box>
+			</Modal>
+
+			<Modal
+				open={roleHasPermissionModalOpen}
+				onClose={() => setRoleHasPermissionModalOpen(false)}
+			>
+				<RoleHasPermissionModal
+					id={roleHasPermissionId}
+					name={roleHasPermission}
+				/>
 			</Modal>
 		</Box>
 	);
