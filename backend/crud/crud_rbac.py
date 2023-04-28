@@ -137,6 +137,14 @@ class CRUDRbac:
         db.commit()
         return db_objs
 
+    def update_role_has_permission(
+        self, db: Session, role_has_permission: RoleHasPermission, new_permission: UUID
+    ) -> Role:
+        role_has_permission.permission_id = new_permission
+        db.commit()
+        db.refresh(role_has_permission)
+        return role_has_permission
+
     def delete_role_has_permission(
         self, db: Session, role_has_permission: RoleHasPermission
     ) -> None:

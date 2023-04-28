@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from api.deps import get_db
 import crud
-from schemas.rbac import PermissionOut, RoleHasPermission
+from schemas.rbac import PermissionOut, RoleHasPermission, RoleHasPermissionUpdate
 from utils.exception import UvicornException
 from utils.security import verify_permission
 
@@ -68,3 +68,46 @@ async def read_role_has_permissions(
         crud.rbac.get_permission_by_id(db, permission_id=db_obj.permission_id)
         for db_obj in db_objs
     ]
+
+
+@router.patch("/{id}", response_model=RoleHasPermission, status_code=200)
+async def update_role_has_permission(
+    id: UUID,
+    permission_update: RoleHasPermissionUpdate,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.update"])
+    if crud.rbac.get_role_by_id(db, role_id=id) is None:
+        raise UvicornException(
+            status_code=404,
+            message="role not found",
+            error=f"role id: {id}",
+        )
+    if (
+        crud.rbac.get_permission_by_id(
+            db, permission_id=permission_update.new_permission_id
+        )
+        is None
+    ):
+        raise UvicornException(
+            status_code=404,
+            message="permission not found",
+            error=f"permission id: {permission_update.new_permission_id}",
+        )
+    db_obj = crud.rbac.get_role_has_permission_by_role_id_and_permission_id(
+        db,
+        role_id=id,
+        permission_id=permission_update.old_permission_id,
+    )
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="role has permission not found",
+            error=f"role id: {id}, permission id: {permission_update.old_permission_id}",
+        )
+    return crud.rbac.update_role_has_permission(
+        db,
+        role_has_permission=db_obj,
+        new_permission=permission_update.new_permission_id,
+    )
