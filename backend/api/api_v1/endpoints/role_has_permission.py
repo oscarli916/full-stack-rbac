@@ -111,3 +111,25 @@ async def update_role_has_permission(
         role_has_permission=db_obj,
         new_permission=permission_update.new_permission_id,
     )
+
+
+@router.delete("/{role_id}/{permission_id}", status_code=204)
+async def delete_role_has_permission(
+    role_id: UUID,
+    permission_id: UUID,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    await verify_permission(db, authorization, permissions=["setting.delete"])
+    db_obj = crud.rbac.get_role_has_permission_by_role_id_and_permission_id(
+        db,
+        role_id=role_id,
+        permission_id=permission_id,
+    )
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="role has permission not found",
+            error=f"role id: {role_id}, permission id: {permission_id}",
+        )
+    crud.rbac.delete_role_has_permission(db, role_has_permission=db_obj)
