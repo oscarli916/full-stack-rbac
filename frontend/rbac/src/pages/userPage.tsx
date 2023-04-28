@@ -159,6 +159,8 @@ const UserPage = () => {
 							await getUserData();
 							console.log(newEmail, newPassword);
 							setModalOpen(false);
+							setNewEmail("");
+							setNewPassword("");
 						}}
 					>
 						Add

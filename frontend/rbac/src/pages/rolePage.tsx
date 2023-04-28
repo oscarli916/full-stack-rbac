@@ -158,6 +158,7 @@ const RolePage = () => {
 							await createRole(newRole, jwt);
 							await getRoleData();
 							setModalOpen(false);
+							setNewRole("");
 						}}
 					>
 						Add

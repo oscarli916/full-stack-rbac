@@ -153,6 +153,7 @@ const PermissionPage = () => {
 							await createPermission(newPermission, jwt);
 							await getPermissionData();
 							setModalOpen(false);
+							setNewPermission("");
 						}}
 					>
 						Add
