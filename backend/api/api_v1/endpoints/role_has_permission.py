@@ -130,6 +130,6 @@ async def delete_role_has_permission(
         raise UvicornException(
             status_code=404,
             message="role has permission not found",
-            error=f"role id: {role_id}, permission id: {permission_id}",
+            error=f"no role id: {role_id}, permission id: {permission_id}",
         )
     crud.rbac.delete_role_has_permission(db, role_has_permission=db_obj)
