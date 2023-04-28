@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import {
-	createPermission,
-	getPermissions,
-	removePermission,
-	updatePermission,
-} from "../axios/permission";
-import { PermissionData } from "../schemas/permission";
+import { RoleData } from "../schemas/role";
+import { createRole, getRoles, removeRole, updateRole } from "../axios/role";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import _ from "lodash";
 import {
 	DataGrid,
 	GridActionsCellItem,
@@ -18,18 +13,18 @@ import {
 	MuiBaseEvent,
 	MuiEvent,
 } from "@mui/x-data-grid";
-import AddToolBar from "../components/Rbac/addToolBar";
-import _ from "lodash";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import AddToolBar from "../components/Rbac";
 
-const PermissionPage = () => {
-	const [permissionData, setPermissionData] = useState<PermissionData[]>([]);
+const RolePage = () => {
+	const [roleData, setRoleData] = useState<RoleData[]>([]);
 	const [modalOpen, setModalOpen] = useState(false);
-	const [newPermission, setNewPermission] = useState("");
+	const [newRole, setNewRole] = useState("");
 
 	const jwt = localStorage.getItem("token");
 	const permissions = JSON.parse(localStorage.getItem("permissions")!);
 
-	const rows: GridRowsProp = permissionData;
+	const rows: GridRowsProp = roleData;
 
 	const columns: GridColDef[] = [
 		{ field: "id", headerName: "ID", width: 150 },
@@ -44,13 +39,13 @@ const PermissionPage = () => {
 			type: "actions",
 			headerName: "Delete",
 			width: 150,
-			getActions: (params: GridRowParams<PermissionData>) => [
+			getActions: (params: GridRowParams<RoleData>) => [
 				<GridActionsCellItem
 					icon={<DeleteIcon />}
 					label="Delete"
 					onClick={async () => {
-						await removePermission(params.id.toString(), jwt);
-						await getPermissionData();
+						await removeRole(params.id.toString(), jwt);
+						await getRoleData();
 					}}
 					color="inherit"
 				/>,
@@ -58,13 +53,13 @@ const PermissionPage = () => {
 		},
 	];
 
-	const getPermissionData = useCallback(async () => {
-		setPermissionData(await getPermissions(jwt));
+	const getRoleData = useCallback(async () => {
+		setRoleData(await getRoles(jwt));
 	}, [jwt]);
 
 	useEffect(() => {
-		getPermissionData();
-	}, [getPermissionData]);
+		getRoleData();
+	}, [getRoleData]);
 
 	return (
 		<Box
@@ -98,12 +93,8 @@ const PermissionPage = () => {
 						).value;
 						if (newValue === undefined || newValue === params.value)
 							return;
-						await updatePermission(
-							params.id.toString(),
-							newValue,
-							jwt
-						);
-						await getPermissionData();
+						await updateRole(params.id.toString(), newValue, jwt);
+						await getRoleData();
 					}}
 					slots={{
 						toolbar: _.includes(permissions, "setting.create")
@@ -113,7 +104,7 @@ const PermissionPage = () => {
 					slotProps={{
 						toolbar: {
 							openModal: () => setModalOpen(true),
-							children: "Add Permission",
+							children: "Add Role",
 						},
 					}}
 				/>
@@ -134,24 +125,24 @@ const PermissionPage = () => {
 					}}
 				>
 					<Typography variant="h5" sx={{ mb: 5 }}>
-						Create New Permission
+						Create New Role
 					</Typography>
 					<TextField
-						label="Permission Name"
+						label="Role Name"
 						variant="outlined"
-						value={newPermission}
+						value={newRole}
 						onChange={(
 							event: React.ChangeEvent<HTMLInputElement>
 						) => {
-							setNewPermission(event.target.value);
+							setNewRole(event.target.value);
 						}}
 					/>
 					<Button
 						variant="contained"
 						sx={{ ml: 5, height: 50 }}
 						onClick={async () => {
-							await createPermission(newPermission, jwt);
-							await getPermissionData();
+							await createRole(newRole, jwt);
+							await getRoleData();
 							setModalOpen(false);
 						}}
 					>
@@ -163,4 +154,4 @@ const PermissionPage = () => {
 	);
 };
 
-export default PermissionPage;
+export default RolePage;

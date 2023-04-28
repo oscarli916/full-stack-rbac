@@ -92,7 +92,8 @@ const UserPage = () => {
 							(event as React.SyntheticEvent<HTMLElement>)
 								.target as HTMLInputElement
 						).value;
-						if (newValue === params.value) return;
+						if (newValue === undefined || newValue === params.value)
+							return;
 						await updateUser(params.id.toString(), newValue, jwt);
 						await getUserData();
 					}}
