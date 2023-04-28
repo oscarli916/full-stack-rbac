@@ -141,3 +141,30 @@ def test_create_duplicate_role_has_permission(db: Session) -> None:
     assert "error" in res
     assert res["message"] == "role has permission has already been created"
     assert res["error"] == f"role id: {role.id}, permission id: {db_objs[0].id}"
+
+
+def test_read_role_has_permissions(db: Session) -> None:
+    email = "admin@test.com"
+    password = "12345678"
+    permissions = ["setting.create", "setting.read", "setting.update", "setting.delete"]
+    admin = UserCreate(email=email, password=password)
+    user = crud.rbac.create_user(db, obj_in=admin)
+    role = crud.rbac.create_role(db, role_name="admin")
+    crud.rbac.create_user_has_role(db, user_id=user.id, role_id=role.id)
+    db_objs = crud.rbac.create_permissions(db, permissions=permissions)
+    crud.rbac.create_role_has_permission(
+        db, role_id=role.id, permission_ids=[obj.id for obj in db_objs]
+    )
+
+    login_data = {"email": email, "password": password}
+    r = client.post("/api/v1/auth/login", json=login_data)
+    res = r.json()
+
+    header = {"authorization": f"Bearer {res['token']}"}
+    r = client.get(f"/api/v1/rbac/role-has-permission/{role.id}", headers=header)
+    res = r.json()
+    assert r.status_code == 200
+    assert len(res) == 4
+    for idx, permission in enumerate(res):
+        assert permission["id"] == str(db_objs[idx].id)
+        assert permission["name"] == db_objs[idx].name
