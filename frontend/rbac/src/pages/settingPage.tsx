@@ -1,10 +1,11 @@
-import { Box, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { Box, Tab, Tabs, Toolbar } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { auth } from "../utils/auth";
 import PermissionPage from "./permissionPage";
 import _ from "lodash";
 import UserPage from "./userPage";
+import RolePage from "./rolePage";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -39,7 +40,9 @@ const SettingPage = () => {
 					{_.includes(permissions, "setting.read") && (
 						<Tab label="User" />
 					)}
-					<Tab label="Role" />
+					{_.includes(permissions, "setting.read") && (
+						<Tab label="Role" />
+					)}
 					{_.includes(permissions, "setting.read") && (
 						<Tab label="Permission" />
 					)}
@@ -49,7 +52,7 @@ const SettingPage = () => {
 				<UserPage />
 			</TabPanel>
 			<TabPanel value={value} index={1}>
-				Role
+				<RolePage />
 			</TabPanel>
 			<TabPanel value={value} index={2}>
 				<PermissionPage />
