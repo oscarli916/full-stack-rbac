@@ -116,6 +116,16 @@ class CRUDRbac:
         )
         return [permission_id[0] for permission_id in permission_ids]
 
+    def get_role_has_permission_by_role_id_and_permission_id(
+        self, db: Session, role_id: UUID, permission_id: UUID
+    ) -> RoleHasPermission | None:
+        return (
+            db.query(RoleHasPermission)
+            .filter(RoleHasPermission.role_id == role_id)
+            .filter(RoleHasPermission.permission_id == permission_id)
+            .first()
+        )
+
     def create_role_has_permission(
         self, db: Session, role_id: UUID, permission_ids: list[UUID]
     ) -> list[RoleHasPermission]:
@@ -126,6 +136,14 @@ class CRUDRbac:
         db.add_all(db_objs)
         db.commit()
         return db_objs
+
+    def update_role_has_permission(
+        self, db: Session, role_has_permission: RoleHasPermission, new_permission: UUID
+    ) -> Role:
+        role_has_permission.permission_id = new_permission
+        db.commit()
+        db.refresh(role_has_permission)
+        return role_has_permission
 
     def delete_role_has_permission(
         self, db: Session, role_has_permission: RoleHasPermission

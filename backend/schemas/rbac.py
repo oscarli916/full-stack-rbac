@@ -51,3 +51,16 @@ class RoleOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class RoleHasPermission(BaseModel):
+    role_id: UUID
+    permission_id: UUID
+
+    class Config:
+        orm_mode = True
+
+
+class RoleHasPermissionUpdate(BaseModel):
+    old_permission_id: UUID
+    new_permission_id: UUID
