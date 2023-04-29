@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from api.deps import get_db
 import crud
-from schemas.rbac import UserHasRole
+from schemas.rbac import RoleOut, UserHasRole
 from utils.exception import UvicornException
 from utils.security import verify_permission
 
@@ -49,3 +49,14 @@ async def create_user_has_role(
         user_id=user_has_role.user_id,
         role_id=user_has_role.role_id,
     )
+
+
+@router.get("/{id}", response_model=list[RoleOut], status_code=200)
+async def read_user_has_roles(
+    id: UUID,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> Any:
+    await verify_permission(db, authorization, permissions=["setting.read"])
+    db_objs = crud.rbac.get_all_user_has_role_by_user_id(db, user_id=id)
+    return [crud.rbac.get_role_by_id(db, role_id=db_obj.role_id) for db_obj in db_objs]
