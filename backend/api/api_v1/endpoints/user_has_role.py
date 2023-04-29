@@ -96,3 +96,23 @@ async def update_user_has_role(
     return crud.rbac.update_user_has_role(
         db, user_has_role=db_obj, new_role=role_update.new_role_id
     )
+
+
+@router.delete("/{user_id}/{role_id}", status_code=204)
+async def delete_user_has_role(
+    user_id: UUID,
+    role_id: UUID,
+    authorization: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+):
+    await verify_permission(db, authorization, permissions=["setting.delete"])
+    db_obj = crud.rbac.get_user_has_role_by_user_id_and_role_id(
+        db, user_id=user_id, role_id=role_id
+    )
+    if not db_obj:
+        raise UvicornException(
+            status_code=404,
+            message="user has role not found",
+            error=f"no user id: {user_id}, role id: {role_id}",
+        )
+    crud.rbac.delete_user_has_role(db, user_has_role=db_obj)
