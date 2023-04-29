@@ -168,6 +168,16 @@ class CRUDRbac:
     ) -> list[UserHasRole]:
         return db.query(UserHasRole).filter(UserHasRole.role_id == role_id).all()
 
+    def get_user_has_permission_by_user_id_and_role_id(
+        self, db: Session, user_id: UUID, role_id: UUID
+    ) -> UserHasRole | None:
+        return (
+            db.query(UserHasRole)
+            .filter(UserHasRole.user_id == user_id)
+            .filter(UserHasRole.role_id == role_id)
+            .first()
+        )
+
     def create_user_has_role(
         self, db: Session, user_id: UUID, role_id: UUID
     ) -> UserHasRole:

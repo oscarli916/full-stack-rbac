@@ -20,13 +20,12 @@ class UserUpdate(BaseModel):
     email: EmailStr
 
 
-# class UserInDB(BaseModel):
-#     id: UUID | None = None
-#     email: str
-#     hashed_password: str
+class UserHasRole(BaseModel):
+    user_id: UUID
+    role_id: UUID
 
-#     class Config:
-#         orm_mode = True
+    class Config:
+        orm_mode = True
 
 
 class PermissionCreate(BaseModel):
