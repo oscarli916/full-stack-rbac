@@ -12,15 +12,19 @@ import {
 	MuiEvent,
 } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditIcon from "@mui/icons-material/Edit";
 import _ from "lodash";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
-import { AddToolBar } from "../components/Rbac";
+import { AddToolBar, UserHasRoleModal } from "../components/Rbac";
 
 const UserPage = () => {
 	const [userData, setUserData] = useState<UserData[]>([]);
 	const [modalOpen, setModalOpen] = useState(false);
 	const [newEmail, setNewEmail] = useState("");
 	const [newPassword, setNewPassword] = useState("");
+	const [userHasRoleModalOpen, setUserHasRoleModalOpen] = useState(false);
+	const [userHasRole, setUserHasRole] = useState("");
+	const [userHasRoleId, setUserHasRoleId] = useState("");
 
 	const jwt = localStorage.getItem("token");
 	const permissions = JSON.parse(localStorage.getItem("permissions")!);
@@ -38,9 +42,18 @@ const UserPage = () => {
 		{
 			field: "actions",
 			type: "actions",
-			headerName: "Delete",
+			headerName: "Edit/Delete",
 			width: 150,
 			getActions: (params: GridRowParams<UserData>) => [
+				<GridActionsCellItem
+					icon={<EditIcon />}
+					label="Edit"
+					onClick={() => {
+						setUserHasRole(params.row.email);
+						setUserHasRoleId(params.id.toString());
+						setUserHasRoleModalOpen(true);
+					}}
+				/>,
 				<GridActionsCellItem
 					icon={<DeleteIcon />}
 					label="Delete"
@@ -166,6 +179,13 @@ const UserPage = () => {
 						Add
 					</Button>
 				</Box>
+			</Modal>
+
+			<Modal
+				open={userHasRoleModalOpen}
+				onClose={() => setUserHasRoleModalOpen(false)}
+			>
+				<UserHasRoleModal id={userHasRoleId} email={userHasRole} />
 			</Modal>
 		</Box>
 	);
