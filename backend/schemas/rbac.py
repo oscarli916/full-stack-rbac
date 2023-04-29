@@ -28,6 +28,11 @@ class UserHasRole(BaseModel):
         orm_mode = True
 
 
+class UserHasRoleUpdate(BaseModel):
+    old_role_id: UUID
+    new_role_id: UUID
+
+
 class PermissionCreate(BaseModel):
     name: str
 

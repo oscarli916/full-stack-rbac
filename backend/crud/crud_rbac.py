@@ -139,7 +139,7 @@ class CRUDRbac:
 
     def update_role_has_permission(
         self, db: Session, role_has_permission: RoleHasPermission, new_permission: UUID
-    ) -> Role:
+    ) -> RoleHasPermission:
         role_has_permission.permission_id = new_permission
         db.commit()
         db.refresh(role_has_permission)
@@ -168,7 +168,7 @@ class CRUDRbac:
     ) -> list[UserHasRole]:
         return db.query(UserHasRole).filter(UserHasRole.role_id == role_id).all()
 
-    def get_user_has_permission_by_user_id_and_role_id(
+    def get_user_has_role_by_user_id_and_role_id(
         self, db: Session, user_id: UUID, role_id: UUID
     ) -> UserHasRole | None:
         return (
@@ -186,6 +186,14 @@ class CRUDRbac:
         db.commit()
         db.refresh(db_obj)
         return db_obj
+
+    def update_user_has_role(
+        self, db: Session, user_has_role: UserHasRole, new_role: UUID
+    ) -> UserHasRole:
+        user_has_role.role_id = new_role
+        db.commit()
+        db.refresh(user_has_role)
+        return user_has_role
 
     def delete_user_has_role(self, db: Session, user_has_role: UserHasRole) -> None:
         db.delete(user_has_role)
