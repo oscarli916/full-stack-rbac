@@ -1,6 +1,7 @@
 import {
 	AppBar,
 	Box,
+	Button,
 	Divider,
 	Drawer,
 	List,
@@ -30,8 +31,18 @@ const CustomDrawer = ({ children }: ICustomDrawer) => {
 				position="fixed"
 				sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
 			>
-				<Toolbar>
+				<Toolbar sx={{ justifyContent: "space-between" }}>
 					<Typography variant="h6">Full Stack RBAC</Typography>
+					<Button
+						color="inherit"
+						onClick={() => {
+							localStorage.removeItem("token");
+							localStorage.removeItem("permissions");
+							navigate("/login");
+						}}
+					>
+						Logout
+					</Button>
 				</Toolbar>
 			</AppBar>
 			<Drawer
@@ -50,7 +61,7 @@ const CustomDrawer = ({ children }: ICustomDrawer) => {
 					<List>
 						{routes.map((route) => {
 							let isAllowed = true;
-							route.permissions.map((permission) => {
+							route.permissions.forEach((permission) => {
 								if (!_.includes(permissions, permission))
 									isAllowed = false;
 							});
