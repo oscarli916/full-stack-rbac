@@ -91,7 +91,7 @@ async def update_user_has_role(
         raise UvicornException(
             status_code=404,
             message="user has role not found",
-            error=f"no role id: {id}, permission id: {role_update.old_role_id}",
+            error=f"no user id: {id}, role id: {role_update.old_role_id}",
         )
     return crud.rbac.update_user_has_role(
         db, user_has_role=db_obj, new_role=role_update.new_role_id
