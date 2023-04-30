@@ -2,7 +2,11 @@
 
 ## Start Application
 
-`docker compose up`
+Make sure Docker has been installed before starting application
+
+Windows: `start.bat`
+
+Linux: `start.sh`
 
 ## Backend
 
@@ -32,7 +36,35 @@ Default data will be seeded automatically
 
 ### Endpoints
 
-the `auth` endpoint make sure user has all the permissions(AND check)
+the `auth` endpoint verify user has all the permissions to use API (AND check)
+
+the `user` endpoint provides CRUD for user
+
+the `user_has_role` endpoint provides CRUD for user has role
+
+the `role` endpoint provides CRUD for role
+
+the `role_has_permission` endpoint provides CRUD for role has permission
+
+the `permission` endpoint provides CRUD for permission
+
+### Database
+
+Use Postgresql docker image
+
+Connects to Postgresql container `db:5432`
+
+Docker compose expose Postgresql to localhost port `4000`
+
+### Testing
+
+Unit tests are written in `/tests` directory
+
+Github Actions for Auto run Unit Tests is set up
+
+### Docker Image
+
+A `Dockerfile` is written for docker compose to spin up the backend
 
 ### FAQ
 
@@ -40,5 +72,10 @@ the `auth` endpoint make sure user has all the permissions(AND check)
 
     Make sure all the `.sh` files are using `LF` for End of Line Sequence
 
-
 ## Frontend
+
+A React frontend for user to access the RBAC Application
+
+### Docker Image
+
+A `Dockerfile` is written for docker compose to spin up the frontend

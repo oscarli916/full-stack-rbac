@@ -85,6 +85,7 @@ const PermissionPage = () => {
 								)
 									? true
 									: false,
+								id: false,
 							},
 						},
 					}}

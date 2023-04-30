@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from api.deps import get_db
 import crud
 from schemas.rbac import RoleOut, UserHasRole, UserHasRoleUpdate
+from utils.auth import verify_permission
 from utils.exception import UvicornException
-from utils.security import verify_permission
 
 
 router = APIRouter()
