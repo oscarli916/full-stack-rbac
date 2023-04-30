@@ -4,9 +4,9 @@ import { routes } from "../routes/routes";
 export const auth = (path: string) => {
 	const permissions = JSON.parse(localStorage.getItem("permissions")!);
 
-	routes.map((route) => {
+	routes.forEach((route) => {
 		if (route.path === path) {
-			route.permissions.map((permission) => {
+			route.permissions.forEach((permission) => {
 				if (!_.includes(permissions, permission))
 					window.location.href = "/error";
 			});

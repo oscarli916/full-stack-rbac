@@ -94,6 +94,7 @@ const UserPage = () => {
 								)
 									? true
 									: false,
+								id: false,
 							},
 						},
 					}}

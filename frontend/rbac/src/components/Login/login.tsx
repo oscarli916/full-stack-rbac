@@ -56,9 +56,10 @@ const Login = ({
 		</Button>
 		<Typography sx={{ mt: 5 }}>Users:</Typography>
 		<Typography sx={{ mt: 2 }}>admin@test.com</Typography>
-		<Typography sx={{ mt: 2 }}>manager1@test.com</Typography>
+		<Typography sx={{ mt: 2 }}>manager@test.com</Typography>
 		<Typography sx={{ mt: 2 }}>senior@test.com</Typography>
-		<Typography sx={{ mt: 2 }}>test1@test.com</Typography>
+		<Typography sx={{ mt: 2 }}>test@test.com</Typography>
+		<Typography sx={{ mt: 5 }}>Password: 12345678</Typography>
 	</Box>
 );
 
