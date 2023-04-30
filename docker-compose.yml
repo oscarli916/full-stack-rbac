@@ -19,6 +19,15 @@ services:
       - '4001:5432'
   backend:
     build: ./backend
+    ports:
+      - '4003:8000'
     depends_on:
       - db
-    command: sh -c "./wait-for-it.sh db:5432 --timeout=30 && ./db/init_db.sh"
+    command: sh -c "./wait-for-it.sh db:5432 --timeout=30 && ./db/init_db.sh && python3 main.py"
+  frontend:
+    build: ./frontend/rbac
+    environment:
+      - PORT=3000
+      - REACT_APP_BACKEND_BASE_URL=http://localhost:4003/api/v1
+    ports:
+      - '3000:3000'
